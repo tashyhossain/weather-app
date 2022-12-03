@@ -1,4 +1,6 @@
-import { getCurrentWeather, updateTime } from './app'
+import { format, fromUnixTime } from 'date-fns'
+import Weather from './weather'
+import { getCurrentWeather, getForecast, updateTime } from './app'
 
 const View = function(root) {
   root.innerHTML = `
@@ -34,7 +36,7 @@ const formatInput = function(input) {
 }
 
 const displayLanding = function(root) {
-  root.classList.add('evening', 'cloudy') // landing backdrop
+  root.classList.add('evening', 'cloudy')
 
   let main = root.querySelector('main')
   let btns = root.querySelectorAll('.nav-btn')
@@ -99,25 +101,29 @@ const displayCurrentWeather = function(root, weather) {
   })
 
   let temperature = weather.getTemp()
+  let description = weather.getWeather()
   let location = root.querySelector('.location')
 
   location.textContent = weather.getLocation()
   main.innerHTML = `
     <div class="current-weather-display">
       <div class="current-temp-display">
-        <div class="degree">${temperature.celsius}</div>
+        <div class="degree">${
+          weather.celsius ? temperature.celsius
+                          : temperature.fahrenheit
+        }</div>
         <div class="unit-icon-wrapper">
           <div class="unit">
-            <button class="celsius active">°C</button>
+            <button class="measure" id="celsius-btn">°C</button>
             <div></div>
-            <button class="fahrenheit">°F</button>
+            <button class="measure" id="fahrenheit-btn">°F</button>
           </div>
           <div class="current-weather-icon">
-            <i class="bi bi-${weather.getWeatherIcon()}"></i>
+            <i class="bi bi-${weather.getWeatherIcon(description)}"></i>
           </div>
         </div>
       </div>  
-      <div class="weather-desc">${weather.getWeather()}</div>
+      <div class="weather-desc">${description}</div>
     </div>
     <div class="current-data-display">
       <div class="current-data wind-data">
@@ -153,51 +159,114 @@ const displayCurrentWeather = function(root, weather) {
     </div>  
   `
 
+  if (weather.celsius) {
+    root.querySelector('#celsius-btn').classList.add('active')
+  } else {
+    root.querySelector('#fahrenheit-btn').classList.add('active')
+  }
+
+  let units = root.querySelectorAll('.measure')
+  units.forEach(unit => {
+    unit.onclick = event => {
+      event.preventDefault()
+
+      if (event.target.id == 'celsius-btn') {
+        weather.celsius = true
+      } else {
+        weather.celsius = false
+      }
+
+      displayCurrentWeather(root, weather)
+      event.target.classList.add('active')
+    }
+  })
+
+  let forecast = root.querySelector('#forecast-btn')
+  let search = root.querySelector('#search-btn')
+
+  forecast.onclick = event => {
+    event.preventDefault()
+    
+    // if (weather.forecast !== []) return displayForecast(root, weather)
+
+    getForecast(weather.current.coord)
+      .then(response => {
+        weather.forecast = response.list.filter(day => day['dt_txt'].includes('09:00:00'))
+        return weather
+      })
+      .then(response => {
+        displayForecast(root, response)
+      })
+  }
+
+  search.onclick = () => {
+    location.reload()
+  }
+
   setInterval(() => updateTime(root, weather.getTime()), 1000)
 }
 
 const displayForecast = function(root, weather) {
   let main = root.querySelector('main')
+  let btns = root.querySelectorAll('.nav-btn')
+
+  btns.forEach(btn => {
+    if (btn.id == 'forecast-btn') {
+      btn.classList.add('active')
+    } else {
+      btn.classList.remove('active')
+    }
+  })
 
   main.innerHTML = `
     <div class="forecast-weather-display">
     <div class="daily-forecast-title">
-      <h5>5 Day Forecast in _</h5>
+      <h5>5 Day Forecast in ${weather.getLocation()}</h5>
     </div>
     <div class="daily-forecast-display">
-      <div class="daily-data">
-        <div class="data-icon"><i class="bi bi-cloud-sun"></i></div>
-        <div class="data-degree">3<span>°C</span></div>
-        <div class="data-date"><span>Thu</span> 12/01</div>
-        <div class="data-desc">Partly Cloudy</div>
-      </div>
-      <div class="daily-data">
-        <div class="data-icon"><i class="bi bi-cloud-sun"></i></div>
-        <div class="data-degree">7<span>°C</span></div>
-        <div class="data-date"><span>Fri</span> 12/02</div>
-        <div class="data-desc">Partly Cloudy</div>
-      </div>
-      <div class="daily-data">
-        <div class="data-icon"><i class="bi bi-cloud-rain"></i></div>
-        <div class="data-degree">11<span>°C</span></div>
-        <div class="data-date"><span>Sat</span> 12/03</div>
-        <div class="data-desc">Rainy</div>
-      </div>
-      <div class="daily-data">
-        <div class="data-icon"><i class="bi bi-sun"></i></div>
-        <div class="data-degree">2<span>°C</span></div>
-        <div class="data-date"><span>Sun</span> 12/04</div>
-        <div class="data-desc">Sunny</div>
-      </div>
-      <div class="daily-data">
-        <div class="data-icon"><i class="bi bi-cloud-sun"></i></div>
-        <div class="data-degree">2<span>°C</span></div>
-        <div class="data-date"><span>Mon</span> 12/05</div>
-        <div class="data-desc">Sunny</div>
-      </div>
     </div>
     </div>    
   `
+
+  let container = root.querySelector('.daily-forecast-display')
+  let days = weather.forecast
+
+  console.log(weather.forecast)
+  days.forEach(day => {
+    let date = fromUnixTime(day.dt)
+    let description = day.weather[0].description
+
+    console.log(day.weather)
+    container.insertAdjacentHTML('beforeend', `
+      <div class="daily-data">
+        <div class="data-icon"><i class="bi bi-${weather.getWeatherIcon(description)}"></i></div>
+        <div class="data-degree">
+          ${weather.celsius ? Weather.celsius(day.main.temp)
+                            : Weather.fahrenheit(day.main.temp)}
+          ${weather.celsius ? '<span>°C</span>'
+                            : '<span>°F</span>'}
+        </div>
+        <div class="data-date">
+          <span>${format(date, 'E')}</span> ${format(date, 'MM/dd')}
+        </div>
+        <div class="data-desc">${description}</div>
+      </div>
+    `)
+  })
+
+  let current = root.querySelector('#weather-btn')
+  let search = root.querySelector('#search-btn') 
+
+  current.onclick = event => {
+    event.preventDefault()
+
+    displayCurrentWeather(root, weather)
+  }
+
+  search.onclick = () => {
+    location.reload()
+  }
+
 }
 
 export default View

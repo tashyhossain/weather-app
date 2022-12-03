@@ -10,7 +10,7 @@ const getCountryCode = async function(country) {
   return data[0]['cca2']
 }
 
-const getAirQuality = async function(lat, lon) {
+const getAirQuality = async function(lon, lat) {
   let response = await fetch(`http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${KEY}`)
   let data = await response.json()
 
@@ -28,11 +28,19 @@ export const getCurrentWeather = async function(input) {
   let weather = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${KEY}`)
   let weatherData = await weather.json()
 
-  let [lat, lon] = [weatherData.coord.lat, weatherData.coord.lon]
-  let airData = await getAirQuality(lat, lon)
+  let { lon, lat } = weatherData.coord
+  let airData = await getAirQuality(lon, lat)
 
-  console.log(weatherData.timezone, weatherData)
   return new Weather(input, weatherData, airData)
+}
+
+export const getForecast = async function(coordinates) {
+  let { lon, lat } = coordinates
+
+  let forecast = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${KEY}`)
+  let data = await forecast.json()
+
+  return data
 }
 
 export const updateTime = function(root, current) {
@@ -42,3 +50,4 @@ export const updateTime = function(root, current) {
   time.textContent = current.format('hh:mm A')
   date.textContent = current.format('dddd MMMM do, YYYY')
 }
+

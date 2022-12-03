@@ -6,6 +6,7 @@ export default class Weather {
     this.current = current
     this.air = air
     this.forecast = []
+    this.celsius = true
   }
 
   getTemp() {
@@ -19,9 +20,7 @@ export default class Weather {
     return this.current.weather[0].description
   }
 
-  getWeatherIcon() {
-    let weather = this.getWeather()
-
+  getWeatherIcon(weather) {
     if (weather.includes('rain')) {
       return 'cloud-rain'
     } else if (weather.includes('snow')) {
@@ -31,6 +30,8 @@ export default class Weather {
     } else if (weather.includes('lightning') || weather.includes('thunder')) {
       return 'lightning'
     } else if (weather.includes('sun')) {
+      return 'cloud-sun'
+    } else if (weather.includes('clear')) {
       return 'sun'
     } else {
       return 'cloud'
