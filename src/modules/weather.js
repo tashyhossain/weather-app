@@ -11,8 +11,8 @@ export default class Weather {
 
   getTemp() {
     return {
-      celsius: Weather.celsius(this.current.main.temp),
-      fahrenheit: Weather.fahrenheit(this.current.main.temp)
+      metric: Weather.celsius(this.current.main.temp),
+      imperial: Weather.fahrenheit(this.current.main.temp)
     }
   }
 
@@ -29,6 +29,10 @@ export default class Weather {
       return 'clouds'
     } else if (weather.includes('lightning') || weather.includes('thunder')) {
       return 'lightning'
+    } else if (weather.includes('mist')) {
+      return 'cloud-haze'
+    } else if (weather.includes('fog')) {
+      return 'cloud-fog'
     } else if (weather.includes('sun')) {
       return 'cloud-sun'
     } else if (weather.includes('clear')) {
@@ -38,8 +42,50 @@ export default class Weather {
     }
   }
 
+  getBackground(weather) {
+    if (weather.includes('rain')) {
+      return 'rain'
+    } else if (weather.includes('snow')) {
+      return 'snow'
+    } else if (weather.includes('cloud')) {
+      return 'cloudy'
+    } else if (weather.includes('lightning') || weather.includes('thunder')) {
+      return 'lightning'
+    } else if (weather.includes('sun')) {
+      return 'sunny'
+    } else if (weather.includes('clear')) {
+      return 'clear'
+    } else {
+      return 'cloudy'
+    }
+  }
+
+  getTimeOfDay(time) {
+    let hour = time.format('hh')
+    let current = time.format('a')
+
+    if (current == 'am' && hour > 5) {
+      return 'day'
+    } else if (current == 'am' && hour <= 5) {
+      return 'night'
+    } else if (current == 'pm' && hour < 4) {
+      return 'day'
+    } else if (current == 'pm' && hour <= 6) {
+      return 'evening'
+    } else if (current == 'pm' && hour > 6) {
+      return 'night'
+    } else {
+      return 'evening'
+    }
+  }
+
   getWind() {
-    return ((this.current.wind.speed / 1000) / (1 / 3600)).toFixed(2)
+    let speed = (this.current.wind.speed / 1000) / (1 / 3600)
+
+    return {
+      metric: speed.toFixed(2),
+      imperial: (speed / 1.609344).toFixed(2)
+    }
   }
 
   getHumidity() {
@@ -47,11 +93,25 @@ export default class Weather {
   }
 
   getVisibility() {
-    return Math.round(this.current.visibility / 1000)
+    let visibility = Math.round(this.current.visibility / 1000)
+
+    return {
+      metric: visibility,
+      imperial: Math.round(visibility * 0.6214)
+    }
   }
 
-  getAirQuality() {
+  getAQI() {
     return this.air.list[0].main.aqi
+  }
+
+  getAQIDescription(aqi) {
+    if (aqi === 1) return 'good'
+    else if (aqi === 2) return 'fair'
+    else if (aqi === 3) return 'moderate'
+    else if (aqi === 4) return 'poor'
+    else if (aqi === 5) return 'very poor'
+    else return 'N/A'
   }
 
   getSnow() {
@@ -80,6 +140,12 @@ export default class Weather {
 
   getTime() {
     return moment().utcOffset(this.current.timezone / 60)
+  }
+
+  getDate() {
+    let seconds = this.current.dt
+    let date = new Date(0)
+    return date.setUTCSeconds(seconds)
   }
 
   static celsius(temp) {

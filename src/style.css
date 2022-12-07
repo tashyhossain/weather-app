@@ -39,32 +39,25 @@ div.app {
   overflow: hidden;
 }
 
-/* div.landing {
-  background: no-repeat center 70%/cover url('./assets/lightning.jpg');
-} */
-
-div.day.sunny {
+div.day.sunny,
+div.day.clear {
   background: no-repeat center 70%/cover url('./assets/sunny-day.jpg');
 }
 
 div.evening.sunny {
-  background: no-repeat center 70%/cover url('./assets/sunset.jpg');
+  background: no-repeat center 70%/cover url('./assets/sunny-evening.jpg');
+}
+
+div.evening.clear {
+  background: no-repeat center 70%/cover url('./assets/clear-evening.jpg');  
 }
 
 div.night.clear {
   background: no-repeat center 70%/cover url('./assets/clear-night.jpg');
 }
 
-div.day.partly-cloudy {
-  background: no-repeat center 70%/cover url('./assets/cloudy-day.jpg');
-}
-
-div.night.partly-cloudy {
-  background: no-repeat center 50%/cover url('./assets/partly-cloudy-night.jpg');
-}
-
 div.day.cloudy {
-  background: no-repeat center 70%/cover url('./assets/sunny-cloudy.jpg');
+  background: no-repeat center 70%/cover url('./assets/cloudy-day.jpg');
 }
 
 div.evening.cloudy {
@@ -76,18 +69,17 @@ div.night.cloudy {
 }
 
 div.day.rain {
-  background: no-repeat center 70%/cover url('./assets/rain.jpg');
+  background: no-repeat center 70%/cover url('./assets/rainy-day.jpg');
 }
 
-div.evening.rain {
-  background: no-repeat center 70%/cover url('./assets/rain2.jpg');
-}
-
+div.evening.rain,
 div.night.rain {
-  background: no-repeat center 50%/cover url('./assets/rainy-night2.jpg');
+  background: no-repeat center 50%/cover url('./assets/rainy-night.jpg');
 }
 
-div.lightning {
+div.day.lightning,
+div.evening.lightning,
+div.night.lightning {
   background: no-repeat center 70%/cover url('./assets/lightning.jpg');
 }
 
@@ -95,6 +87,7 @@ div.day.snow {
   background: no-repeat center 50%/cover url('./assets/snowy-day.jpg');
 }
 
+div.evening.snow,
 div.night.snow {
   background: no-repeat center 50%/cover url('./assets/snowy-night.jpg');
 }
@@ -115,11 +108,20 @@ div.app::after {
     rgba(15, 16, 18, 0.5));
 }
 
+div.container {
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+}
+
 div.date-time-display {
   display: flex;
   flex-flow: column wrap;
   justify-content: center;
   align-items: flex-end;
+  width: 100%;
   padding: 0 0 1em 0;
   z-index: 99;
   text-align: right;
@@ -147,10 +149,10 @@ div.weather-display {
   z-index: 99;
 }
 
-div.date-time-display,
+/* div.date-time-display,
 div.weather-display {
   width: 550px;
-}
+} */
 
 nav {
   display: flex; 
@@ -183,7 +185,17 @@ main {
   justify-content: center;
   align-items: center;
   padding: 1em;
+  color: #FFFFFF;
   background: rgba(24, 25, 27, 0.4);
+}
+
+main.main-search-display {
+  min-width: 450px;
+  padding: 10px 20px;
+}
+
+main.main-weather-display {
+  width: 450px;
 }
 
 main form {
@@ -196,13 +208,39 @@ div.input-wrapper {
   flex: 1;
 }
 
+main form input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 main form input {
   width: 100%;
   color: #FFFFFF;
 }
 
-main form button {
-  cursor: pointer;
+button#submit-btn {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 25px;
+  padding: 0;
+}
+
+button#submit-btn span {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.3em;
+  line-height: 0.9em;
+}
+
+button#submit-btn span.show {
+  opacity: 1;
+  padding-left: 5px;
+  transition: all 0.5s ease-in-out;
+}
+
+button#submit-btn span.hidden {
+  opacity: 0;
+  padding-left: 0px;
+  transition: all 0.5s ease-in-out;
 }
 
 div.message {
@@ -213,10 +251,6 @@ div.message {
 
 div.message.hidden {
   display: none;
-}
-
-main.search-display {
-  padding: 10px 20px;
 }
 
 div.current-weather-display {
@@ -277,8 +311,7 @@ div.current-data-display {
   flex-flow: row wrap;
   justify-content: space-evenly;
   align-content: center;
-  flex: 1;
-  padding: 0 1em 1em 1em;
+  padding: 0 0 1em 0;
 }
 
 div.current-data {
@@ -299,9 +332,10 @@ div.current-data div.data-point {
 }
 
 div.current-data div.data-point span {
-    color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.7em;
   font-weight: 700;
+  text-transform: lowercase;
 }
 
 div.current-data div.data-desc {
@@ -324,9 +358,10 @@ div.forecast-weather-display {
 }
 
 div.daily-forecast-title {
-  align-self: flex-end;
+  align-self: center;
   color: rgba(255, 255, 255, 0.8);
 }
+
 div.daily-forecast-title h5 {
   margin: 0;
 }

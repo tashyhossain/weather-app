@@ -1,13 +1,12 @@
 import './style.css'
 import View from './modules/view'
-import displayWeather, { getCity, getSuggestions } from './modules/app'
-import Weather from './modules/weather'
+import Event from './modules/event'
 
 const initialize = function() {
   let app = document.querySelector('#app')
 
   View(app)
-
+  Event.publish('DISPLAY-LANDING', app)
 }
 
 initialize()
