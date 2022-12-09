@@ -10,7 +10,7 @@ const getCountryCode = async function(country) {
 }
 
 const getAirQuality = async function(lon, lat) {
-  let response = await fetch(`http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${KEY}`)
+  let response = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${KEY}`)
   let data = await response.json()
 
   return data
