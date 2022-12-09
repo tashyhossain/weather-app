@@ -1,4 +1,3 @@
-import { format } from 'date-fns'
 import Weather from "./weather"
 
 const KEY = process.env.API_KEY
@@ -20,12 +19,12 @@ const getAirQuality = async function(lon, lat) {
 export const getCurrentWeather = async function(input) {
   let location = input
 
-  if (Array.isArray(input)) {
-    let country = await getCountryCode(input[1])
-    location = input[0] + ',' + country
-  }
-
   try {
+    if (Array.isArray(input)) {
+      let country = await getCountryCode(input[1])
+      location = input[0] + ',' + country
+    }
+
     let weather = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${KEY}`)
     let weatherData = await weather.json()
   
@@ -51,12 +50,3 @@ export const getForecast = async function(coordinates) {
     throw new Error(error)
   }
 }
-
-export const updateTime = function(root, currentTime, currentDate) {
-  let time = root.querySelector('.time-display')
-  let date = root.querySelector('.date-display')
-
-  time.textContent = currentTime.format('hh:mm A')
-  date.textContent = format(currentDate, 'EEEE MMMM do, yyyy')
-}
-

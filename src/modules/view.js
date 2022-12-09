@@ -1,8 +1,8 @@
+import * as data from '../assets/credits.json'
 import { format, fromUnixTime } from 'date-fns'
-import moment from 'moment'
+import { getCurrentWeather, getForecast } from './app'
 import Event from './event'
 import Weather from './weather'
-import { getCurrentWeather, getForecast, updateTime } from './app'
 
 const View = function(root) {
   root.innerHTML = `
@@ -24,12 +24,20 @@ const View = function(root) {
         </main>
       </div>
     </div>
+    <footer>
+      <span>
+        <a href="https://restcountries.com/">Rest Countries API</a>
+      </span>
+      <span>
+        <a href="https://openweathermap.org/">OpenWeather API</a>
+      </span>
+      <span id="photo-source"></span>
+    </footer>
   `
 
   Event.subscribe('DISPLAY-LANDING', displayLanding)
   Event.subscribe('DISPLAY-WEATHER', displayCurrentWeather)
   Event.subscribe('DISPLAY-FORECAST', displayForecast)
-  Event.subscribe('REFRESH', refresh)
 }
 
 const formatInput = function(input) {
@@ -42,18 +50,30 @@ const formatInput = function(input) {
   return formatted
 }
 
-const displayLanding = function(root) {
-  root.classList.add('evening', 'cloudy')
+const displayCredit = function(root) {
+  let dom = root.querySelector('#photo-source')
+  let name = root.classList.value.split(' ').join('-')
+  let credit = data[name]
 
+  dom.innerHTML = `
+    <a id="photo-source" href="${credit.url}">${credit.name}</a>
+  `
+}
+
+const displayLanding = function(root, clock) {
   let main = root.querySelector('main')
+  let location = root.querySelector('.location')
   let btns = root.querySelectorAll('.nav-btn')
+
+  root.classList = 'app evening cloudy'
+  location.textContent = ''
 
   btns.forEach(btn => {
     if (btn.id == 'search-btn') btn.classList.add('active')
     else btn.disabled = true
   })
 
-  main.classList.add('main-search-display')
+  main.classList = 'main-search-display'
   main.innerHTML = `
     <form autocomplete="off">
       <div class="input-wrapper">
@@ -76,7 +96,7 @@ const displayLanding = function(root) {
 
     getCurrentWeather(input)
       .then(response => {
-        Event.publish('DISPLAY-WEATHER', root, response)
+        Event.publish('DISPLAY-WEATHER', root, clock, response)
       })
       .catch(() => {
         msg.classList.remove('hidden')
@@ -98,23 +118,22 @@ const displayLanding = function(root) {
       submit.classList.add('show')
     }
   }
+
+  clock.start()
+  displayCredit(root)
 }
 
-const displayCurrentWeather = function(root, weather) {
-  let description = weather.getWeather()
-  let time = weather.getTime()
-
-  let background = weather.getBackground(description)
-  let timeOfDay = weather.getTimeOfDay(time)
-
-  root.classList.remove('evening', 'cloudy')
-  root.classList.add(timeOfDay, background)
-
+const displayCurrentWeather = function(root, clock, weather) {
   let main = root.querySelector('main')
   let btns = root.querySelectorAll('.nav-btn')
+  let location = root.querySelector('.location')
 
-  main.classList.remove('main-search-display')
-  main.classList.add('main-weather-display')
+  root.classList = 'app'
+  root.classList.add(weather.getTimeOfDay())
+  root.classList.add(weather.getWeatherType())
+
+  main.classList = 'main-weather-display'
+  location.textContent = weather.getLocation()
 
   btns.forEach(btn => {
     btn.disabled = false
@@ -125,18 +144,13 @@ const displayCurrentWeather = function(root, weather) {
   let temperature = weather.getTemp()
   let windspeed = weather.getWind()
   let visibility = weather.getVisibility()
-  let airQuality = weather.getAQI()
-  let location = root.querySelector('.location')
-
-  weather.getTimeOfDay(weather.getTime())
-  location.textContent = weather.getLocation()
+  let description = weather.getWeatherDescription()
 
   main.innerHTML = `
     <div class="current-weather-display">
       <div class="current-temp-display">
         <div class="degree">${
-          weather.celsius ? temperature.metric
-                          : temperature.imperial
+          weather.celsius ? temperature.metric : temperature.imperial
         }</div>
         <div class="unit-icon-wrapper">
           <div class="unit">
@@ -155,31 +169,25 @@ const displayCurrentWeather = function(root, weather) {
       <div class="current-data wind-data">
         <div class="data-icon"><i class="bi bi-wind"></i></div>
         <div class="data-point">
-          ${weather.celsius ? windspeed.metric 
-                            : windspeed.imperial} 
-          ${weather.celsius ? '<span>km/h</span>'
-                            : '<span>mph</span>'}
+          ${weather.celsius ? windspeed.metric : windspeed.imperial} 
         </div>
         <div class="data-desc">Wind Speed</div>
       </div>
       <div class="current-data humidity-data">
         <div class="data-icon"><i class="bi bi-moisture"></i></div>
-        <div class="data-point">${weather.getHumidity()}<span>%</span></div>
+        <div class="data-point">${weather.getHumidity()}</div>
         <div class="data-desc">Humidity</div>
       </div>
       <div class="current-data visibility-data">
         <div class="data-icon"><i class="bi bi-eye"></i></div>
         <div class="data-point">
-          ${weather.celsius ? visibility.metric 
-                            : visibility.imperial}
-          ${weather.celsius ? '<span>km</span>'
-                            : '<span>mi</span>'}
+          ${weather.celsius ? visibility.metric : visibility.imperial}
         </div>
         <div class="data-desc">Visibility</div>
       </div>
       <div class="current-data air-data">
-        <div class="data-icon">${airQuality}</div>
-        <div class="data-point">${weather.getAQIDescription(airQuality)}</div>
+        <div class="data-icon">${weather.getAQI()}</div>
+        <div class="data-point">${weather.getAQIDescription()}</div>
         <div class="data-desc">Air Quality</div>
       </div>
       <div class="current-data snow-data">
@@ -194,8 +202,6 @@ const displayCurrentWeather = function(root, weather) {
       </div>
     </div>  
   `
-
-  setInterval(() => updateTime(root, weather.getTime(), weather.getDate()), 1000)
 
   if (weather.celsius) {
     root.querySelector('#celsius-btn').classList.add('active')
@@ -214,7 +220,7 @@ const displayCurrentWeather = function(root, weather) {
         weather.celsius = false
       }
 
-      Event.publish('DISPLAY-WEATHER', root, weather)
+      Event.publish('DISPLAY-WEATHER', root, clock, weather)
       event.target.classList.add('active')
     }
   })
@@ -232,28 +238,30 @@ const displayCurrentWeather = function(root, weather) {
           return weather
         })
         .then(response => {
-          Event.publish('DISPLAY-FORECAST', root, response)
+          Event.publish('DISPLAY-FORECAST', root, clock, response)
         })
         .catch(() => {
           main.innerHTML = 'Something went wrong. Please try again.'
         })
     } else {
-      Event.publish('DISPLAY-FORECAST', root, weather)
+      Event.publish('DISPLAY-FORECAST', root, clock, weather)
     }
 
   }
 
   search.onclick = () => {
-    Event.publish('REFRESH', null)
+    Event.publish('DISPLAY-LANDING', root, clock)
   }
+
+  clock.offset(weather.getTime())
+  displayCredit(root)
 }
 
-const displayForecast = function(root, weather) {
+const displayForecast = function(root, clock, weather) {
   let main = root.querySelector('main')
   let btns = root.querySelectorAll('.nav-btn')
 
-  main.classList.remove('main-weather-display')
-  main.classList.add('main-forecast-display')
+  main.classList = 'main-forecast-display'
 
   btns.forEach(btn => {
     if (btn.id == 'forecast-btn') {
@@ -265,11 +273,10 @@ const displayForecast = function(root, weather) {
 
   main.innerHTML = `
     <div class="forecast-weather-display">
-    <div class="daily-forecast-title">
-      <h5>5 Day Forecast in ${weather.getLocation()}</h5>
-    </div>
-    <div class="daily-forecast-display">
-    </div>
+      <div class="daily-forecast-title">
+        <h5>5 Day Forecast in ${weather.getLocation()}</h5>
+      </div>
+      <div class="daily-forecast-display"></div>
     </div>    
   `
 
@@ -303,17 +310,13 @@ const displayForecast = function(root, weather) {
   current.onclick = event => {
     event.preventDefault()
 
-    Event.publish('DISPLAY-WEATHER', root, weather)
+    Event.publish('DISPLAY-WEATHER', root, clock, weather)
   }
 
   search.onclick = () => {
-    Event.publish('REFRESH', null)
+    Event.publish('DISPLAY-LANDING', root, clock)
   }
 
-}
-
-const refresh = function(_) {
-  location.reload()
 }
 
 export default View

@@ -1,0 +1,70 @@
+{
+  "app-day-sunny": {
+    "name": "Photo by revac film's&photography",
+    "url": "https://www.pexels.com/photo/country-road-during-daytime-108444/"
+  },
+  "app-day-clear": {
+    "name": "Photo by revac film's&photography",
+    "url": "https://www.pexels.com/photo/country-road-during-daytime-108444/"
+  },
+  "app-evening-sunny": {
+    "name": "Photo by George Becker",
+    "url": "https://www.pexels.com/photo/photography-of-city-351434/"
+  },
+  "app-evening-clear": {
+    "name": "Photo by Daniel Frank",
+    "url": "https://www.pexels.com/photo/silhouette-of-trees-and-houses-under-calm-blue-sky-during-golden-hour-323314/"
+  },
+  "app-night-clear": {
+    "name": "Photo by Lachlan  Ross",
+    "url": "https://www.pexels.com/photo/river-with-shiny-pier-under-cloudless-starry-sky-6510358/"
+  },
+  "app-day-cloudy": {
+    "name": "Photo by Min An",
+    "url": "https://www.pexels.com/photo/mountains-with-crepuscular-ray-1403550/"
+  },
+  "app-evening-cloudy": {
+    "name": "Photo by Pixabay",
+    "url": "https://www.pexels.com/photo/grey-white-clouds-158163/"
+  },
+  "app-night-cloudy": {
+    "name": "Photo by Guilherme Rossi",
+    "url": "https://www.pexels.com/photo/concrete-bridge-near-buildings-during-golden-hour-1755683/"
+  },
+  "app-day-rain": {
+    "name": "Photo by veeterzy",
+    "url": "https://www.pexels.com/photo/road-between-pine-trees-39811/"
+  },
+  "app-evening-rain": {
+    "name": "Photo by Elijah O'Donnell",
+    "url": "https://www.pexels.com/photo/cars-stuck-in-traffic-3359186/"
+  },
+  "app-night-rain": {
+    "name": "Photo by Elijah O'Donnell",
+    "url": "https://www.pexels.com/photo/cars-stuck-in-traffic-3359186/"
+  },
+  "app-day-lightning": {
+    "name": "Photo by Rodrigo Souza",
+    "url": "https://www.pexels.com/photo/photo-of-thunderstorm-2531709/"
+  },
+  "app-evening-lightning": {
+    "name": "Photo by Rodrigo Souza",
+    "url": "https://www.pexels.com/photo/photo-of-thunderstorm-2531709/"
+  },
+  "app-night-lightning": {
+    "name": "Photo by Rodrigo Souza",
+    "url": "https://www.pexels.com/photo/photo-of-thunderstorm-2531709/"
+  },
+  "app-day-snow": {
+    "name": "Photo by Sindre Fs",
+    "url": "https://www.pexels.com/photo/snowy-road-between-trees-907284/"
+  },
+  "app-evening-snow": {
+    "name": "Photo by Pixabay",
+    "url": "https://www.pexels.com/photo/atmosphere-branch-cold-dark-358235/"
+  },
+  "app-night-snow": {
+    "name": "Photo by Pixabay",
+    "url": "https://www.pexels.com/photo/atmosphere-branch-cold-dark-358235/"
+  }
+}

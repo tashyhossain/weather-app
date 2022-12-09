@@ -8,6 +8,26 @@ export default class Weather {
     this.forecast = []
     this.celsius = true
   }
+  
+  static celsius(temp) {
+    return Math.round(temp - 273.15)
+  }
+
+  static fahrenheit(temp) {
+    return Math.round(1.8*(temp - 273) + 32)
+  }
+
+  getLocation() {
+    if (Array.isArray(this.location)) {
+      return this.location[0] + ', ' + this.location[1]
+    } else {
+      return this.location + ', ' + this.current.sys.country
+    }
+  }
+
+  getTime() {
+    return moment().utcOffset(this.current.timezone / 60)
+  }
 
   getTemp() {
     return {
@@ -16,7 +36,7 @@ export default class Weather {
     }
   }
 
-  getWeather() {
+  getWeatherDescription() {
     return this.current.weather[0].description
   }
 
@@ -42,7 +62,9 @@ export default class Weather {
     }
   }
 
-  getBackground(weather) {
+  getWeatherType() {
+    let weather = this.getWeatherDescription()
+
     if (weather.includes('rain')) {
       return 'rain'
     } else if (weather.includes('snow')) {
@@ -60,7 +82,8 @@ export default class Weather {
     }
   }
 
-  getTimeOfDay(time) {
+  getTimeOfDay() {
+    let time = this.getTime()
     let hour = time.format('hh')
     let current = time.format('a')
 
@@ -68,11 +91,11 @@ export default class Weather {
       return 'day'
     } else if (current == 'am' && hour <= 5) {
       return 'night'
-    } else if (current == 'pm' && hour < 4) {
+    } else if (current == 'pm' && hour < 5) {
       return 'day'
-    } else if (current == 'pm' && hour <= 6) {
+    } else if (current == 'pm' && hour <= 7) {
       return 'evening'
-    } else if (current == 'pm' && hour > 6) {
+    } else if (current == 'pm' && hour > 7) {
       return 'night'
     } else {
       return 'evening'
@@ -83,21 +106,21 @@ export default class Weather {
     let speed = (this.current.wind.speed / 1000) / (1 / 3600)
 
     return {
-      metric: speed.toFixed(2),
-      imperial: (speed / 1.609344).toFixed(2)
+      metric: `${speed.toFixed(2)} <span>km/h</span>`,
+      imperial: `${(speed / 1.609344).toFixed(2)} <span>mph</span>`
     }
   }
 
   getHumidity() {
-    return this.current.main.humidity
+    return this.current.main.humidity + '<span>%</span>'
   }
 
   getVisibility() {
-    let visibility = Math.round(this.current.visibility / 1000)
+    let visibility = this.current.visibility / 1000
 
     return {
-      metric: visibility,
-      imperial: Math.round(visibility * 0.6214)
+      metric: `${Math.round(visibility)} <span>km</span>`,
+      imperial: `${Math.round(visibility * 0.6214)} <span>mi</span>`
     }
   }
 
@@ -105,7 +128,9 @@ export default class Weather {
     return this.air.list[0].main.aqi
   }
 
-  getAQIDescription(aqi) {
+  getAQIDescription() {
+    let aqi = this.getAQI()
+
     if (aqi === 1) return 'good'
     else if (aqi === 2) return 'fair'
     else if (aqi === 3) return 'moderate'
@@ -116,7 +141,13 @@ export default class Weather {
 
   getSnow() {
     if (this.current.snow) {
-      return `${this.current.snow['1h']} <span>cm</span>`
+      let snow = this.current.snow['1h']
+
+      if (this.celsius) {
+        return `${snow.toFixed(2)} <span>cm</span>`
+      } else {
+        return `${(snow * 0.39370).toFixed(2)} <span>in</span>`
+      }
     } else {
       return '-'
     }
@@ -124,35 +155,15 @@ export default class Weather {
 
   getRain() {
     if (this.current.rain) {
-      return `${this.current.rain['1h']} <span>cm</span>`
+      let rain = this.current.rain['1h']
+
+      if (this.celsius) {
+        return `${rain.toFixed(2)} <span>cm</span>`
+      } else {
+        return `${(rain * 0.39370).toFixed(2)} <span>in</span>`
+      }
     } else {
       return '-'
     }
-  }
-
-  getLocation() {
-    if (Array.isArray(this.location)) {
-      return this.location[0] + ', ' + this.location[1]
-    } else {
-      return this.location + ', ' + this.current.sys.country
-    }
-  }
-
-  getTime() {
-    return moment().utcOffset(this.current.timezone / 60)
-  }
-
-  getDate() {
-    let seconds = this.current.dt
-    let date = new Date(0)
-    return date.setUTCSeconds(seconds)
-  }
-
-  static celsius(temp) {
-    return Math.round(temp - 273.15)
-  }
-
-  static fahrenheit(temp) {
-    return Math.round(1.8*(temp - 273) + 32)
   }
 }
